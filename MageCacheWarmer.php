@@ -22,7 +22,8 @@ class MageCacheWarmer
         $_cStatusCallback,
         $_fAvgDownloadTime,
         $_iTotalDownloadTime,
-        $_rStreamContext;
+        $_rStreamContext,
+        $_priorityThreshold;
 
     public function getAvgDownloadTime()   { return $this->_fAvgDownloadTime;   }
     public function getTotalDownloadTime() { return $this->_iTotalDownloadTime; }
@@ -30,13 +31,14 @@ class MageCacheWarmer
     /**
      * Download the sitemap for testing / warming.
      */
-    public function __construct($sSitemapUrl, $cStatusCallback, $iDelay, $iUnsecure)
+    public function __construct($sSitemapUrl, $cStatusCallback, $iDelay, $iUnsecure, $priorityThreshold)
     {
         $this->_sSitemapUrl     = $sSitemapUrl;
         $this->_cStatusCallback = $cStatusCallback;
         $this->_iDelay          = $iDelay;
         $this->_iUnsecure       = $iUnsecure;
         $this->_rStreamContext  = $this->_createStreamContext();
+        $this->_priorityThreshold=$priorityThreshold;
     }
 
     /**
@@ -51,6 +53,7 @@ class MageCacheWarmer
     {
         $sSitemapXml = $this->_downloadSitemap($this->_sSitemapUrl);
 
+        $this->_aSiteUrls = [];
         $this->_parseSitemap($sSitemapXml);
 
         return $this;
@@ -205,8 +208,26 @@ class MageCacheWarmer
 
         $oSitemap->registerXPathNamespace('sitemap', $sXmlns);
 
-        $this->_aSiteUrls = $oSitemap->xpath("//sitemap:loc");
-        $this->_iNumUrls  = count($this->_aSiteUrls);
+        if ( count($_subsitemaps = $oSitemap->xpath("//sitemap:sitemap")) > 0 ) {
+            foreach ( $_subsitemaps as $_subsitemap ) {
+                $loc = (string)$_subsitemap->loc;
+                $xml = $this->_downloadSitemap($loc);
+                $this->_parseSitemap($xml);
+            }
+        }
+
+        if ( count($_urls = $oSitemap->xpath("//sitemap:url")) > 0 ) {
+            foreach ( $_urls as $_url ) {
+                $loc = (string) $_url->loc;
+                $priority = floatval($_url->priority);
+
+                if ( $priority >= $this->_priorityThreshold ) {
+                    $this->_aSiteUrls[] = $loc;
+                    $this->_iNumUrls = count($this->_aSiteUrls);
+                }
+            }
+        }
+
     }
 
     private function _createStreamContext()

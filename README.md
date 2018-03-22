@@ -19,7 +19,7 @@ Average page time (in milliseconds): 502.69110202789
 ```
 
 ### Warming the FPC
-To actually warm the FPC, use `-w` as the first argument. `wfpc` will fetch each URL listed in sitemap.xml synchronously.
+`wfpc` will fetch each URL listed in sitemap.xml synchronously.
 
 The warmer will run an initial test, warm your entire site, then test again and report on performance gain
 
@@ -30,20 +30,28 @@ Speedup is 75.07%
 ```
 
 #### Delayed requests
-If you want to put a delay between requests, you can add a `-d=delay-seconds` after the `-w` argument. An example
+If you want to put a delay between requests, you can add a `-d=delay-seconds`. An example
 
 ##### No delay
 ```
-./wfpc -w http://mymagentosite.com/sitemap.xml
+./wfpc http://mymagentosite.com/sitemap.xml
 ```
 ##### With 1 second delay
 ```
-./wfpc -w -d=1 http://mymagentosite.com/sitemap.xml
+./wfpc -d=1 http://mymagentosite.com/sitemap.xml
 ```
+#### Priority
+Only URLs with priority=1 will be warmed
+
+To select another priority threshold:
+```
+./wfpc -p=.7 http://mymagentosite.com/sitemap.xml
+```
+
 #### Test or Run on usecure urls
 ```
 ./wfpc -k -t https://192.169.1.234/sitemap.xml
-./wfpc -k -w https://192.169.1.234/sitemap.xml
+./wfpc -k https://192.169.1.234/sitemap.xml
 ```
 If you have a large site with a lot of URLs to warm, you might consider running `wfpc` within a [`screen`](http://www.gnu.org/software/screen/manual/screen.html) session.
 
