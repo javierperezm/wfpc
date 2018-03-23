@@ -52,8 +52,17 @@ class MageCacheWarmer
      */
     public function loadSitemap()
     {
+        // Text file?
+        if ( pathinfo($this->_sSitemapUrl, PATHINFO_EXTENSION) == 'txt' ) {
+            $this->_aSiteUrls = file($this->_sSitemapUrl, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $this->_iNumUrls = count($this->_aSiteUrls);
+            return $this;
+        }
+
+        // Download XML content
         $sSitemapXml = $this->_downloadSitemap($this->_sSitemapUrl);
 
+        // Parse XML
         $this->_aSiteUrls = [];
         $this->_parseSitemap($sSitemapXml);
 
