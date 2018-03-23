@@ -11,6 +11,7 @@
  */
 class MageCacheWarmer
 {
+    const USER_AGENT = 'WFPCbot/1.0';
     const MAX_TEST_URLS = 10;
 
     private
@@ -236,7 +237,7 @@ class MageCacheWarmer
         // some webservers return a 503 error when no user agent is set.
         $streamContext['http'] = array(
             'header' => array(
-                'User-Agent: WFPC Cache Warmer'
+                'User-Agent: ' . self::USER_AGENT
             )
         );
 
