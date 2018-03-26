@@ -161,8 +161,8 @@ class MageCacheWarmer
             // Note the start time and download the page
             $iPageStartTime = microtime(true);
 
-            file_get_contents($sUrl, false, $this->_rStreamContext);
-        
+            @file_get_contents($sUrl, false, $this->_rStreamContext);
+
             // Update the total download time
             $iTotalDownloadTime += microtime(true) - $iPageStartTime;
 
